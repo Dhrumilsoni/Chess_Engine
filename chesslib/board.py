@@ -3,6 +3,8 @@ from copy import deepcopy
 
 import pieces
 import re
+import copy
+import time
 
 class ChessError(Exception): pass
 class InvalidCoord(ChessError): pass
@@ -32,7 +34,7 @@ class Board(dict):
     '''
 
     axis_y = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')
-    axis_x = tuple(range(1,9)) # (1,2,3,...8)
+    axis_x = tuple(range(1, 9)) # (1,2,3,...8)
 
     captured_pieces = { 'white': [], 'black': [] }
     player_turn = None
@@ -42,9 +44,11 @@ class Board(dict):
     fullmove_number = 1
     history = []
 
-    def __init__(self, fen = None):
-        if fen is None: self.load(FEN_STARTING)
-        else: self.load(fen)
+    def __init__(self, fen=None):
+        if fen is None:
+            self.load(FEN_STARTING)
+        else:
+            self.load(fen)
 
     def __getitem__(self, coord):
         if isinstance(coord, str):
@@ -79,6 +83,8 @@ class Board(dict):
         dest  = self[p2]
         del self[p1]
         self[p2] = piece
+        # print self
+        # print self.keys()
 
     def _finish_move(self, piece, dest, p1, p2):
         '''
@@ -105,7 +111,6 @@ class Board(dict):
             self.halfmove_clock = 0
 
         self.history.append(movetext)
-
 
     def all_possible_moves(self, color):
         '''
@@ -254,15 +259,110 @@ class Board(dict):
     def check_legal_moves(self, color):
         print self.legal_moves(color)
 
+    def evaluate_state(self):
+        white_value = 0
+        black_value = 0
+        for coord in self.keys():
+            if(self[coord] is not None and self[coord].color == "white"):
+                # print self[coord]
+                # print coord
+                # print self[coord].color
+                # print self[coord].abbriviation
+
+                if self[coord].abbriviation=='P':
+                    white_value += 1
+                elif self[coord].abbriviation=='N':
+                    white_value += 3
+                elif self[coord].abbriviation=='R':
+                    white_value += 4
+                elif self[coord].abbriviation=='B':
+                    white_value += 5
+                elif self[coord].abbriviation=='Q':
+                    white_value += 9
+                elif self[coord].abbriviation=='K':
+                    white_value += 100
+            elif (self[coord] is not None) and self[coord].color == "black":
+                if self[coord].abbriviation=='p':
+                    black_value += 1
+                elif self[coord].abbriviation=='n':
+                    black_value += 3
+                elif self[coord].abbriviation=='r':
+                    black_value += 4
+                elif self[coord].abbriviation=='b':
+                    black_value += 5
+                elif self[coord].abbriviation=='q':
+                    black_value += 9
+                elif self[coord].abbriviation=='k':
+                    black_value += 100
+        # print black_value
+        # print white_value
+        # time.sleep(50)
+        return black_value-white_value
+
+    def dfs(self, local_board, maximizer, depth, to_move):
+        if depth is 1:
+            return local_board.evaluate_state()
+        local_local_board = Board()
+        local_local_board.load(local_board.export())
+        local_local_board.move(to_move[0], to_move[1])
+        if maximizer is 1:
+            min_value = 0
+            for ele in local_local_board.legal_moves("white"):
+                # print ele
+                min_value = max(min_value, local_local_board.dfs(local_local_board, 0, depth+1, ele))
+            return min_value
+        else:
+            max_value = -1000
+            for ele in local_local_board.legal_moves("black"):
+                max_value = min(max_value, local_local_board.dfs(local_local_board, 1, depth+1, ele))
+            return max_value
+
     def make_move(self, color):
-        moves = self.legal_moves(color)
-        # self.move()
-        # print moves
-        # print "HI"
-        # print moves[0]
-        # print moves[0][0]
-        # print moves[0][1]
-        self.move(moves[0][0], moves[0][1])
+        # local_black=[]
+        # for ele in black_moves:
+        #     local_black.append([ele[0], ele[1], type(self[ele[0]]).__name__])
+        # local_white=[]
+        # for ele in white_moves:
+        #     local_white.append([ele[0], ele[1], type(ele[0]).__name__])
+        # dfs(local_black, local_white, 1)
+        # print black_moves
+        # print white_moves
+        # print "hi"
+
+        local_board = Board()
+        local_board.load(self.export())
+        black_moves = local_board.legal_moves("black")
+        max_value = 0
+        final_move = black_moves[0]
+        for ele in black_moves:
+            temp_val=local_board.dfs(local_board, 1, 0, ele)
+            if max_value<=temp_val:
+                max_value = temp_val
+                final_move = ele
+        print max_value
+        self.move(final_move[0], final_move[1])
+
+
+        # print local_board.legal_moves("black")
+        # print local_board.legal_moves("white")
+        # local_board.keys()
+        # local_board.move((local_board.legal_moves("white"))[0][0], (local_board.legal_moves("white"))[0][1])
+        # print local_board
+
+        # if color == "black":
+        #     self.move(black_moves[0][0], black_moves[0][1])
+        # else :
+        #     self.move(white_moves[0][0], white_moves[0][1])
+        # curr_state = [[]]
+        # for i in range(1, 9):
+        #     for j in range(1, 9):
+        #         if self[(char(i)+'A')+j] is not None:
+        #             curr_state[i][j].append([self[coord].color, type(self[coord]).__name__])
+        # print curr_state
+
+        # for coord in self.keys():
+        #     print coord + " " + self[coord].color + " " + type(self[coord]).__name__
+        # self.move(moves[0][0], moves[0][1])
 
     def move(self, p1, p2):
 

@@ -32,3 +32,4 @@ try:
     # from chesslib.gui_console import display
 finally:
     display(game)
+
