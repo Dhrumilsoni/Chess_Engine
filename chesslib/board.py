@@ -1,6 +1,7 @@
 from itertools import groupby
 from copy import deepcopy
 
+import os
 import pieces
 import re
 import copy
@@ -190,7 +191,7 @@ class Board(dict):
         for x, row in enumerate(fen[0].split('/')):
             for y, letter in enumerate(row):
                 if letter == ' ': continue
-                coord = self.letter_notation((7-x,y))
+                coord = self.letter_notation((7-x, y))
                 self[coord] = pieces.piece(letter)
                 self[coord].place(self)
 
@@ -212,7 +213,7 @@ class Board(dict):
 
         def replace_spaces(row):
             # replace spaces with their count
-            result = [join(k, list(g)) for k,g in groupby(row)]
+            result = [join(k, list(g)) for k, g in groupby(row)]
             return "".join(result)
 
 
@@ -281,7 +282,7 @@ class Board(dict):
                     white_value += 9
                 elif self[coord].abbriviation=='K':
                     white_value += 100
-            elif (self[coord] is not None) and self[coord].color == "black":
+            elif (self[coord] is not None and self[coord].color == "black"):
                 if self[coord].abbriviation=='p':
                     black_value += 1
                 elif self[coord].abbriviation=='n':
@@ -300,11 +301,11 @@ class Board(dict):
         return black_value-white_value
 
     def dfs(self, local_board, maximizer, depth, to_move):
-        if depth is 1:
+        if depth is 2:
             return local_board.evaluate_state()
         local_local_board = Board()
         local_local_board.load(local_board.export())
-        local_local_board.move(to_move[0], to_move[1])
+        local_local_board.move1(to_move[0], to_move[1])
         if maximizer is 1:
             min_value = 0
             for ele in local_local_board.legal_moves("white"):
@@ -318,29 +319,62 @@ class Board(dict):
             return max_value
 
     def make_move(self, color):
+        # for coord in self.keys():
+        #     print coord
+        # print self.keys()
+        # print self.export()
+        var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\curr_board.in", "w")
+
+        print self.export()
+        var.write(self.export())
+        time.sleep(5)
+        var.close()
+        os.system("g++ C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\bing.cpp")
+        time.sleep(5)
+        os.system("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\a.exe")
+        time.sleep(5)
+        var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\inp.in","r")
+        str1 = ""
+        str2 = ""
+        for xx in var:
+            str1 = xx[:2]
+            str2 = xx[2:]
+        var.close()
+
+
+
         # local_black=[]
         # for ele in black_moves:
         #     local_black.append([ele[0], ele[1], type(self[ele[0]]).__name__])
         # local_white=[]
         # for ele in white_moves:
         #     local_white.append([ele[0], ele[1], type(ele[0]).__name__])
-        # dfs(local_black, local_white, 1)
+        # dfs(local_bla
+        # ck, local_white, 1)
         # print black_moves
         # print white_moves
         # print "hi"
 
-        local_board = Board()
-        local_board.load(self.export())
-        black_moves = local_board.legal_moves("black")
-        max_value = 0
-        final_move = black_moves[0]
-        for ele in black_moves:
-            temp_val=local_board.dfs(local_board, 1, 0, ele)
-            if max_value<=temp_val:
-                max_value = temp_val
-                final_move = ele
-        print max_value
-        self.move(final_move[0], final_move[1])
+        # local_board = Board()
+        # file = open("curr_board.in", "w")
+        # file.write(self.export())
+        # file.close()
+        #
+        #
+        # local_board.load(self.export())
+        # black_moves = local_board.legal_moves("black")
+        # max_value = 0
+        # final_move = black_moves[0]
+        # for ele in black_moves:
+        #
+        #     temp_val = local_board.dfs(local_board, 1, 0, ele)
+        #     if max_value <= temp_val:
+        #         max_value = temp_val
+        #         final_move = ele
+        # # print max_value
+        print str1
+        print str2
+        self.move(str1, str2)
 
 
         # print local_board.legal_moves("black")
@@ -365,7 +399,6 @@ class Board(dict):
         # self.move(moves[0][0], moves[0][1])
 
     def move(self, p1, p2):
-
         p1, p2 = p1.upper(), p2.upper()
         piece = self[p1]
         dest  = self[p2]
@@ -390,6 +423,29 @@ class Board(dict):
         else:
             self._do_move(p1, p2)
             self._finish_move(piece, dest, p1, p2)
+        # print piece.color
+        # if piece.color == "white":
+        #     color = "black"
+        # else:
+        #     color = "white"
+
+        # if color == "black":
+        #     # print "go black"
+        #     self.make_move(color)
+
+    def move1(self, p1, p2):
+        p1, p2 = p1.upper(), p2.upper()
+        piece = self[p1]
+        dest  = self[p2]
+        if self.player_turn != piece.color:
+            raise NotYourTurn("Not " + piece.color + "'s turn!")
+
+        # 0. Check if p2 is in the possible moves
+
+        # If enemy has any moves look for check
+
+        self._do_move(p1, p2)
+        self._finish_move(piece, dest, p1, p2)
         # print piece.color
         if piece.color == "white":
             color = "black"

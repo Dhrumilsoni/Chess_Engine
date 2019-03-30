@@ -60,7 +60,7 @@ class BoardGuiTk(tk.Frame):
 
     def click(self, event):
         # self.refresh()
-        print "Click"
+        # print "Click"
         # Figure out which square we've clicked
         global turn
         col_size = row_size = event.widget.master.square_size
@@ -182,7 +182,7 @@ class BoardGuiTk(tk.Frame):
                 self.placepiece(piecename, x, y)
 
     def move_engine(self):
-        print "in move_engine"
+        # print "in move_engine"
         global turn
         if turn is 1:
             self.chessboard.make_move("black")
