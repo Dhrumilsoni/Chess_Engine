@@ -324,15 +324,13 @@ class Board(dict):
         # print self.keys()
         # print self.export()
         var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\curr_board.in", "w")
-
         print self.export()
         var.write(self.export())
-        time.sleep(5)
         var.close()
-        os.system("g++ C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\bing.cpp")
-        time.sleep(5)
-        os.system("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\a.exe")
-        time.sleep(5)
+        # os.system("g++ C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\bing.cpp")
+        # time.sleep(5)
+        print(os.system("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\a.exe"))
+        # time.sleep(5)
         var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\inp.in","r")
         str1 = ""
         str2 = ""
@@ -455,3 +453,6 @@ class Board(dict):
         # if color == "black":
         #     # print "go black"
         #     self.make_move(color)
+# Todo
+# Raise stalemate error
+# Queen from pawn
