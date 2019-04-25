@@ -23,50 +23,53 @@ struct ChessBoard {
 
 
     void reset(){
-        turn = Turn::black;
+        turn = Turn::white;
+
         white_pieces.clear();
         black_pieces.clear();
         for (int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
-                if (board[i-1][j-1] == 'p') {
+                if (board[i][j] == 'p') {
+                    //cout<<"b";
                     black_pieces[Pos(i,j)] = Piece::black_pawn;
                 }
-                if (board[i-1][j-1] == 'P') {
+                if (board[i][j] == 'P') {
+                    //cout<<"w";
                     white_pieces[Pos(i,j)] = Piece::white_pawn;
                 }
 
-                if (board[i-1][j-1] == 'r') {
+                if (board[i][j] == 'r') {
                     black_pieces[Pos(i,j)] = Piece::rook;
                 }
-                if (board[i-1][j-1] == 'R') {
+                if (board[i][j] == 'R') {
                     white_pieces[Pos(i,j)] = Piece::rook;
                 }
 
-                if (board[i-1][j-1] == 'n') {
+                if (board[i][j] == 'n') {
                     black_pieces[Pos(i,j)] = Piece::knight;
                 }
-                if (board[i-1][j-1] == 'N') {
+                if (board[i][j] == 'N') {
                     white_pieces[Pos(i,j)] = Piece::knight;
                 }
 
-                if (board[i-1][j-1] == 'b') {
+                if (board[i][j] == 'b') {
                     black_pieces[Pos(i,j)] = Piece::bishop;
                 }
-                if (board[i-1][j-1] == 'B') {
+                if (board[i][j] == 'B') {
                     white_pieces[Pos(i,j)] = Piece::bishop;
                 }
 
-                if (board[i-1][j-1] == 'q') {
+                if (board[i][j] == 'q') {
                     black_pieces[Pos(i,j)] = Piece::queen;
                 }
-                if (board[i-1][j-1] == 'Q') {
+                if (board[i][j] == 'Q') {
                     white_pieces[Pos(i,j)] = Piece::queen;
                 }
 
-                if (board[i-1][j-1] == 'k') {
+                if (board[i][j] == 'k') {
                     black_pieces[Pos(i,j)] = Piece::king;
                 }
-                if (board[i-1][j-1] == 'K') {
+                if (board[i][j] == 'K') {
                     white_pieces[Pos(i,j)] = Piece::king;
                 }
 
@@ -96,7 +99,7 @@ struct ChessBoard {
         auto isFree = [&] (int dx, int dy) -> bool { return !isOwn(dx,dy) && isInsideBoard(dx,dy) && !isOpponent(dx,dy); };
 
         auto addMove = [&] (int dx, int dy) -> bool {
-            if(isFree(dx,dy) || isOpponent(dx,dy)){
+            if((isFree(dx,dy) || isOpponent(dx,dy)) && isInsideBoard(dx, dy)){
                 moves.push_back(Pos(from,dx,dy));
                 return true;
             }
@@ -109,16 +112,16 @@ struct ChessBoard {
         auto moving_piece = moverPieces()[from];
         switch(moving_piece){
             case Piece::white_pawn:
-                if(isFree(0,-1)) addMove(0,-1);
-                if(isFree(0,-1) && isFree(0,-2) && from.y==7) addMove(0,-2);
+                if(isFree(-1,0)) addMove(-1,0);
+                if(isFree(-1,0) && isFree(-2,0) && from.x==7) addMove(-2,0);
                 if(isOpponent(-1,-1)) addMove(-1,-1);
-                if(isOpponent(1,-1)) addMove(1,-1); 
+                if(isOpponent(-1,1)) addMove(-1,1); 
                 break;
 
             case Piece::black_pawn:
-                if(isFree(0,1)) addMove(0,1);
-                if(isFree(0,1) && isFree(0,2) && from.y==2) addMove(0,2);
-                if(isOpponent(-1,1)) addMove(-1,1);
+                if(isFree(1,0)) addMove(1,0);
+                if(isFree(1,0) && isFree(2,0) && from.x==2) addMove(2,0);
+                if(isOpponent(1,-1)) addMove(1,-1);
                 if(isOpponent(1,1)) addMove(1,1);
                 break;
 
@@ -166,7 +169,107 @@ struct ChessBoard {
 
         return moves;
     }
- 
+    
+    int occupied() {
+        int white_occupied = 0, black_occupied = 0;
+        int board1[9][9];
+        if(turn!=Turn::white){
+            flipTurn();
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                board1[i][j] = 0;
+            }
+        }
+        for(auto &from : white_pieces) {
+            board1[from.first.x][from.first.y]=1;
+            for(auto &to : possibleMoves(from.first)) {
+                   board1[to.x][to.y] = 1;
+            }
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                //cout<<board1[i][j]<<" ";
+                if(board1[i][j]){
+                    white_occupied++;
+                }
+            }
+            //cout<<"\n";
+        }
+        flipTurn();
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                board1[i][j] = 0;
+            }
+        }
+        for(auto &from : black_pieces) {
+            board1[from.first.x][from.first.y]=1;
+            for(auto &to : possibleMoves(from.first)) {
+                    board1[to.x][to.y] = 1;
+            }
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                if(board1[i][j])
+                    black_occupied++;
+            }
+        }
+        //cout<<white_occupied<<" "<<black_occupied<<"\n";
+        return white_occupied - black_occupied;
+    }
+
+    int bishop_score(){
+        int cnt=0;
+        for(auto &p : white_pieces){
+            if(p.second==Piece::bishop || p.second==Piece::queen){
+                cnt++;
+            }
+        }
+        if(cnt>1)
+            return 1;
+        return 0;
+    }
+
+    int opponent_bishop_score(){
+        int cnt=0;
+        for(auto &p : white_pieces){
+            if(p.second==Piece::bishop || p.second==Piece::queen){
+                cnt++;
+            }
+        }
+        if(cnt>1)
+            return 1;
+        return 0;
+    }
+
+    int king_safety(){
+        int cnt=0;
+        if(turn==Turn::black)
+            flipTurn();
+        for(auto &p : white_pieces){
+            if(p.second==Piece::king){
+                for(auto &to : possibleMoves(p.first)) {
+                   cnt++;
+                }
+            }
+        }
+        return cnt;
+    }
+
+    int opponent_king_safety(){
+        int cnt=0;
+        if(turn==Turn::white)
+            flipTurn();
+        for(auto &p : black_pieces){
+            if(p.second==Piece::king){
+                for(auto &to : possibleMoves(p.first)) {
+                   cnt++;
+                }
+            }
+        }
+        return cnt;
+    }
+
     int score(){
         int sumWhite = 0;
         for(auto & p : white_pieces){
@@ -174,15 +277,15 @@ struct ChessBoard {
         }
         int sumBlack = 0;
         for(auto & p : black_pieces)
-            sumBlack += pieceValues[p.second];        
-        cout<<"sw "<<sumWhite<<" "<<" sb "<<sumBlack<<endl;
+            sumBlack += pieceValues[p.second];
+        //cout<<"sw"<<sumWhite<<" sb"<<sumBlack<<endl;
         return sumWhite-sumBlack;
     }
  
     struct Move{
         Pos from,to;
         int score;};
- 
+
     Move minimax(int depth, bool minimize,long long alpha,long long beta){//TODO: alpha beta pruning
     	
         Move best_move;
@@ -246,9 +349,9 @@ struct ChessBoard {
     }
 };
  
-map<ChessBoard::Piece,int> ChessBoard::pieceValues {{ChessBoard::Piece::king, 10000},
+map<ChessBoard::Piece,int> ChessBoard::pieceValues {{ChessBoard::Piece::king, 100},
 {ChessBoard::Piece::queen, 9}, {ChessBoard::Piece::black_pawn, 1}, {ChessBoard::Piece::white_pawn, 1},
-{ChessBoard::Piece::bishop, 3},{ChessBoard::Piece::knight, 3},{ChessBoard::Piece::rook, 5},};
+{ChessBoard::Piece::bishop, 5},{ChessBoard::Piece::knight, 3},{ChessBoard::Piece::rook, 4},};
 
 
 
