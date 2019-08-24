@@ -1,5 +1,5 @@
 # Python-Chess
-Python Chess Engine which works on machine learning model and is based on GUI as well as console version.
+Python Chess Engine works on machine learning model and is based on GUI as well as console version.
 
 Requirements: 
    Python 2(2.7 preferrable)
