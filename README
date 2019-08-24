@@ -1,30 +1,10 @@
-Simple Python Chess
--------------------
-Author: Liudmil Mitev
-E-Mail: liudmil.mitev@gmail.com
--------------------
+Python Chess Engine which works on machine learning model and is based on GUI as well as console version.
 
-A simple python chess implementation, a learning project.
-Turns out that programming a chess game is no trivial task,
-so I've tried to make it as modular and as easy to learn from as possible.
+Requirements: 
+   Python 2(2.7 preferrable)
+   Tkinter
+   
+Quick overview of code:
+   Handling of board and GUI is done on python which is in the folder chesslib. However, the working of minimax and machine learning algo of SVM is done on c++, which can be found in the versions folder.
 
-Contains:
-    * dict-based board representation
-    * move validation
-    * Console-based Unicode GUI
-    * TkInter GUI
-
-Requirements:
-    * Python 2.5+
-    * TkInter
-    * PIL
-
-To install the dependancies on debian/ubuntu run:
-    sudo apt-get install python-tk python-imaging python-imaging-tk
-
-TODO:
-    * En passant
-    * Pawn promotion
-    * Fifty-move rule
-    * Tests
-    * Scalable GUI window
+Would love to collabrate with someone interested. If interested, please mailto: dhrumilv[at]usc[dot]edu
