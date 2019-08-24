@@ -16,7 +16,8 @@ class CheckMate(ChessError): pass
 class Draw(ChessError): pass
 class NotYourTurn(ChessError): pass
 
-FEN_STARTING = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+FEN_STARTING = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' # Starting fen notation
 RANK_REGEX = re.compile(r"^[A-Z][1-8]$")
 fl = 0
 
@@ -32,8 +33,12 @@ class Board(dict):
         * Fifty-move rule
     '''
 
+    # Initializing variables for orientation
+
     axis_y = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')
     axis_x = tuple(range(1, 9)) # (1,2,3,...8)
+
+    # Initializing variables for working
 
     captured_pieces = { 'white': [], 'black': [] }
     player_turn = None
@@ -42,6 +47,9 @@ class Board(dict):
     halfmove_clock = 0
     fullmove_number = 1
     history = []
+
+    # Try to load a fen
+
     def __init__(self, fen=None):
         if fen is None:
             self.load(FEN_STARTING)
@@ -60,6 +68,10 @@ class Board(dict):
             return None
 
     def save_to_file(self): pass
+
+    # Functions for checking and validating a move
+
+    # Names of the functions are analogous to its meaning
 
     def is_in_check_after_move(self, p1, p2):
         # Create a temporary board
@@ -171,6 +183,8 @@ class Board(dict):
             return False
         else: return True
 
+    # Load the fen
+
     def load(self, fen):
         '''
             Import state from FEN notation
@@ -197,6 +211,8 @@ class Board(dict):
         self.en_passant = fen[3]
         self.halfmove_clock = int(fen[4])
         self.fullmove_number = int(fen[5])
+
+    # Converting a chess board (dictionary) into fen
 
     def export(self):
         '''
@@ -230,6 +246,8 @@ class Board(dict):
                          str(self.fullmove_number)]))
         return result
 
+    # Check if move is legal
+
     def legal_moves(self, color):
         '''
             Return a list of `color`'s legal moves.
@@ -255,16 +273,14 @@ class Board(dict):
     def check_legal_moves(self, color):
         print self.legal_moves(color)
 
+    # Evaluate state by getting the exact score of the pieces
+    # Following functions are not called as of now as c++ code for the same thing works faster
+
     def evaluate_state(self):
         white_value = 0
         black_value = 0
         for coord in self.keys():
             if(self[coord] is not None and self[coord].color == "white"):
-                # print self[coord]
-                # print coord
-                # print self[coord].color
-                # print self[coord].abbriviation
-
                 if self[coord].abbriviation=='P':
                     white_value += 1
                 elif self[coord].abbriviation=='N':
@@ -313,12 +329,17 @@ class Board(dict):
                 max_value = min(max_value, local_local_board.dfs(local_local_board, 1, depth+1, ele))
             return max_value
 
+    # This function is called when AI has to make a move
+
     def make_move(self, color):
         global fl
         # for coord in self.keys():
         #     print coord
         # print self.keys()
         # print self.export()
+
+
+        # fl defines if it is a starting move or not. If yes, then starting procedure is followed
 
         if fl is 0:
             fl = 1
@@ -332,15 +353,23 @@ class Board(dict):
             str2="F6"
             self.move(str1, str2)
             return
+
+        # Export fen state to a file named curr_board.in
         var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\curr_board.in", "w")
         print self.export()
         var.write(self.export())
         var.close()
-        # os.system("g++ C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\bing.cpp")
-        # time.sleep(5)
+
+        # Calling a.exe which will run the executable file which is made from c++ code in the versions folder
+
         print(os.system("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\a.exe"))
         # time.sleep(5)
+
+        # Output of the executable is imported from inp.in
+
         var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\inp.in", "r")
+
+        # Processing of output
         str1 = ""
         str2 = ""
         for xx in var:
@@ -348,64 +377,26 @@ class Board(dict):
             str2 = xx[2:]
         var.close()
 
-        # local_black=[]
-        # for ele in black_moves:
-        #     local_black.append([ele[0], ele[1], type(self[ele[0]]).__name__])
-        # local_white=[]
-        # for ele in white_moves:
-        #     local_white.append([ele[0], ele[1], type(ele[0]).__name__])
-        # dfs(local_bla
-        # ck, local_white, 1)
-        # print black_moves
-        # print white_moves
+        # Calling the move function which finally completes the move with validation for legality and checks.
 
-        # local_board = Board()
-        # file = open("curr_board.in", "w")
-        # file.write(self.export())
-        # file.close()
-        #
-        # local_board.load(self.export())
-        # black_moves = local_board.legal_moves("black")
-        # max_value = 0
-        # final_move = black_moves[0]
-        # for ele in black_moves:
-        #
-        #     temp_val = local_board.dfs(local_board, 1, 0, ele)
-        #     if max_value <= temp_val:
-        #         max_value = temp_val
-        #         final_move = ele
-        # # print max_value
         print str1
         print str2
         self.move(str1, str2)
 
-        # print local_board.legal_moves("black")
-        # print local_board.legal_moves("white")
-        # local_board.keys()
-        # local_board.move((local_board.legal_moves("white"))[0][0], (local_board.legal_moves("white"))[0][1])
-        # print local_board
-
-        # if color == "black":
-        #     self.move(black_moves[0][0], black_moves[0][1])
-        # else :
-        #     self.move(white_moves[0][0], white_moves[0][1])
-        # curr_state = [[]]
-        # for i in range(1, 9):
-        #     for j in range(1, 9):
-        #         if self[(char(i)+'A')+j] is not None:
-        #             curr_state[i][j].append([self[coord].color, type(self[coord]).__name__])
-        # print curr_state
-
-        # for coord in self.keys():
-        #     print coord + " " + self[coord].color + " " + type(self[coord]).__name__
-        # self.move(moves[0][0], moves[0][1])
+    # This function finally validates and makes the move.
 
     def move(self, p1, p2):
+        # Getting piece's values
         p1, p2 = p1.upper(), p2.upper()
         piece = self[p1]
         dest  = self[p2]
+
+        # Checking for the turn correctly
+
         if self.player_turn != piece.color:
             raise NotYourTurn("Not " + piece.color + "'s turn!")
+
+        # Checking if the move is valid or not
 
         enemy = self.get_enemy(piece.color)
         possible_moves = piece.possible_moves(p1)
@@ -418,47 +409,10 @@ class Board(dict):
             if self.is_in_check_after_move(p1, p2):
                 raise Check
 
-        if not possible_moves and self.is_in_check(piece.color):
-            raise CheckMate
-        elif not possible_moves:
-            raise Draw
-        else:
-            self._do_move(p1, p2)
-            self._finish_move(piece, dest, p1, p2)
-        # print piece.color
-        # if piece.color == "white":
-        #     color = "black"
-        # else:
-        #     color = "white"
-
-        # if color == "black":
-        #     # print "go black"
-        #     self.make_move(color)
-
-    def move1(self, p1, p2):
-        p1, p2 = p1.upper(), p2.upper()
-        piece = self[p1]
-        dest = self[p2]
-
-        if self.player_turn != piece.color:
-            raise NotYourTurn("Not " + piece.color + "'s turn!")
-
-        enemy = self.get_enemy(piece.color)
-        possible_moves = piece.possible_moves(p1)
-        # 0. Check if p2 is in the possible moves
-        if p2 not in possible_moves:
-            raise InvalidMove
-
-        # If enemy has any moves look for check
-        # if self.all_possible_moves(enemy):
-        #     if self.is_in_check_after_move(p1, p2):
-        #         raise Check
+        # Raise checkmate or draw if such an event occurs or complete the move finally
 
         if not possible_moves and self.is_in_check(piece.color):
             raise CheckMate
-        elif self.all_possible_moves(enemy):
-            if self.is_in_check_after_move(p1, p2):
-                raise Check
         elif not possible_moves:
             raise Draw
         else:

@@ -7,8 +7,9 @@ if sys.version_info[0] > 2:
 
 from chesslib import board
 
-# Load a save if it exists
 
+# Load a save if it exists else go for a new game.
+# Every game is store via fen notation only.
 if os.path.exists("state.fen"):
     with open("state.fen") as save:
         game = board.Board(save.read())
@@ -25,6 +26,7 @@ if len(sys.argv) > 1:
         print'''Usage: game.py [OPTION]\n\n\tPlay a game of chess\n\n\tOptions:\n\t -c, --console\tplay in console mode\n\n'''
         exit(0)
 
+# Try if tkinter is accessible if not go for a console version
 try:
     from chesslib.gui_tkinter import display
 # except ImportError:
