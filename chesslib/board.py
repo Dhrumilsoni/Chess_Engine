@@ -18,16 +18,14 @@ class NotYourTurn(ChessError): pass
 
 FEN_STARTING = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 RANK_REGEX = re.compile(r"^[A-Z][1-8]$")
+fl = 0
 
 class Board(dict):
     '''
        Board
 
-       A simple chessboard class
-
        TODO:
 
-        * PGN export
         * En passant
         * Castling
         * Promoting pawns
@@ -44,7 +42,6 @@ class Board(dict):
     halfmove_clock = 0
     fullmove_number = 1
     history = []
-
     def __init__(self, fen=None):
         if fen is None:
             self.load(FEN_STARTING)
@@ -67,10 +64,8 @@ class Board(dict):
     def is_in_check_after_move(self, p1, p2):
         # Create a temporary board
         tmp = deepcopy(self)
-        tmp._do_move(p1,p2)
+        tmp._do_move(p1, p2)
         return tmp.is_in_check(self[p1].color)
-
-
 
     def get_enemy(self, color):
         if color == "white": return "black"
@@ -104,7 +99,7 @@ class Board(dict):
             self.halfmove_clock = 0
         if dest is None:
             # No capturing
-            movetext = abbr +  p2.lower()
+            movetext = abbr + p2.lower()
         else:
             # Capturing
             movetext = abbr + 'x' + p2.lower()
@@ -319,10 +314,24 @@ class Board(dict):
             return max_value
 
     def make_move(self, color):
+        global fl
         # for coord in self.keys():
         #     print coord
         # print self.keys()
         # print self.export()
+
+        if fl is 0:
+            fl = 1
+            str1="D7"
+            str2="D5"
+            self.move(str1, str2)
+            return
+        if fl is 1:
+            fl = 2
+            str1="G8"
+            str2="F6"
+            self.move(str1, str2)
+            return
         var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\curr_board.in", "w")
         print self.export()
         var.write(self.export())
@@ -331,15 +340,13 @@ class Board(dict):
         # time.sleep(5)
         print(os.system("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\a.exe"))
         # time.sleep(5)
-        var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\inp.in","r")
+        var = open("C:\\Users\\dhrum\\Downloads\\Simple-Python-Chess-master-20190308T062157Z-001\\Simple-Python-Chess-master\\inp.in", "r")
         str1 = ""
         str2 = ""
         for xx in var:
             str1 = xx[:2]
             str2 = xx[2:]
         var.close()
-
-
 
         # local_black=[]
         # for ele in black_moves:
@@ -351,13 +358,11 @@ class Board(dict):
         # ck, local_white, 1)
         # print black_moves
         # print white_moves
-        # print "hi"
 
         # local_board = Board()
         # file = open("curr_board.in", "w")
         # file.write(self.export())
         # file.close()
-        #
         #
         # local_board.load(self.export())
         # black_moves = local_board.legal_moves("black")
@@ -373,7 +378,6 @@ class Board(dict):
         print str1
         print str2
         self.move(str1, str2)
-
 
         # print local_board.legal_moves("black")
         # print local_board.legal_moves("white")
@@ -434,25 +438,33 @@ class Board(dict):
     def move1(self, p1, p2):
         p1, p2 = p1.upper(), p2.upper()
         piece = self[p1]
-        dest  = self[p2]
+        dest = self[p2]
+
         if self.player_turn != piece.color:
             raise NotYourTurn("Not " + piece.color + "'s turn!")
 
+        enemy = self.get_enemy(piece.color)
+        possible_moves = piece.possible_moves(p1)
         # 0. Check if p2 is in the possible moves
+        if p2 not in possible_moves:
+            raise InvalidMove
 
         # If enemy has any moves look for check
+        # if self.all_possible_moves(enemy):
+        #     if self.is_in_check_after_move(p1, p2):
+        #         raise Check
 
-        self._do_move(p1, p2)
-        self._finish_move(piece, dest, p1, p2)
-        # print piece.color
-        if piece.color == "white":
-            color = "black"
+        if not possible_moves and self.is_in_check(piece.color):
+            raise CheckMate
+        elif self.all_possible_moves(enemy):
+            if self.is_in_check_after_move(p1, p2):
+                raise Check
+        elif not possible_moves:
+            raise Draw
         else:
-            color = "white"
+            self._do_move(p1, p2)
+            self._finish_move(piece, dest, p1, p2)
 
-        # if color == "black":
-        #     # print "go black"
-        #     self.make_move(color)
 # Todo
 # Raise stalemate error
 # Queen from pawn

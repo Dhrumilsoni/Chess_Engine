@@ -225,21 +225,17 @@ struct ChessBoard {
                 cnt++;
             }
         }
-        if(cnt>1)
-            return 1;
-        return 0;
+        return cnt;
     }
-
+    
     int opponent_bishop_score(){
         int cnt=0;
-        for(auto &p : white_pieces){
+        for(auto &p : black_pieces){
             if(p.second==Piece::bishop || p.second==Piece::queen){
                 cnt++;
             }
         }
-        if(cnt>1)
-            return 1;
-        return 0;
+        return cnt;
     }
 
     int king_safety(){
@@ -248,7 +244,7 @@ struct ChessBoard {
             flipTurn();
         for(auto &p : white_pieces){
             if(p.second==Piece::king){
-                for(auto &to : possibleMoves(from.first)) {
+                for(auto &to : possibleMoves(p.first)) {
                    cnt++;
                 }
             }
@@ -262,7 +258,7 @@ struct ChessBoard {
             flipTurn();
         for(auto &p : black_pieces){
             if(p.second==Piece::king){
-                for(auto &to : possibleMoves(from.first)) {
+                for(auto &to : possibleMoves(p.first)) {
                    cnt++;
                 }
             }
@@ -281,7 +277,21 @@ struct ChessBoard {
         //cout<<"sw"<<sumWhite<<" sb"<<sumBlack<<endl;
         return sumWhite-sumBlack;
     }
- 
+    
+    int scorewp(){
+        int sumWhite = 0;
+        for(auto & p : white_pieces){
+            if(pieceValues[p.second]!=1)
+                sumWhite += pieceValues[p.second];
+        }
+        int sumBlack = 0;
+        for(auto & p : black_pieces)
+            if(pieceValues[p.second]!=1)
+                sumBlack += pieceValues[p.second];
+        //cout<<"sw"<<sumWhite<<" sb"<<sumBlack<<endl;
+        return sumWhite-sumBlack;
+    }
+
     struct Move{
         Pos from,to;
         int score;};
@@ -377,21 +387,27 @@ void gen_board(string line) {
 
 int main() {
     fstream fi;
-    fi.open("data.csv");
+    fi.open("lose.txt");
+    ofstream out;
+    out.open("datasvm.csv", ios::app);
     string line;
-    int h = 5;
-    while(getline(fi, line) && h--) {
+    while(getline(fi, line)) {
+        if(line=="")
+            break;
+        
         gen_board(line);
         ChessBoard game;
         game.reset();
         int score_feature = game.score();
+        int score_without_pawn = game.scorewp();
         int score_occupied = game.occupied();
         int two_bishop = game.bishop_score();
-        int op_bishop_score = game.op_bishop_score();
+        int op_bishop_score = game.opponent_bishop_score();
         int king_safety = game.king_safety();
         int op_king_safety = game.opponent_king_safety();
-        cout << score_feature << " " << score_occupied << "\n";
+        out<<score_feature<<","<<score_without_pawn<<","<<score_occupied<<","<<two_bishop<<","<<op_bishop_score<<","<<king_safety<<","<<op_king_safety<<","<<"1"<<endl;
     }
+    out.close();
     fi.close();
     return 0;
 }

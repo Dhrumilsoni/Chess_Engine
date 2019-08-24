@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 using namespace std;
+#define engine 2
 #define MAX(a,b) (a > b ? a : b)
 #define MIN(a,b) (a < b ? a : b)
 char board[9][9];
@@ -137,7 +138,7 @@ struct ChessBoard {
             //     if(isFree(1,0) && isFree(2,0) && from.y==2) addMove(2,0);
             //     if(isOpponent(1,-1)) addMove(1,-1);
             //     if(isOpponent(1,1)) addMove(1,1);
-                break;
+            //    break;
 
             case Piece::knight:
                 addMove(-2,-1); addMove(-2,1); addMove(2,-1); addMove(2,1);
@@ -169,7 +170,104 @@ struct ChessBoard {
 
         return moves;
     }
-    
+    /*
+    int occupied() {
+        int white_occupied = 0, black_occupied = 0;
+        int board1[9][9];
+        if(turn!=Turn::white){
+            flipTurn();
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                board1[i][j] = 0;
+            }
+        }
+        for(auto &from : white_pieces) {
+            board1[from.first.x][from.first.y]=1;
+            for(auto &to : possibleMoves(from.first)) {
+                   board1[to.x][to.y] = 1;
+            }
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                //cout<<board1[i][j]<<" ";
+                if(board1[i][j]){
+                    white_occupied++;
+                }
+            }
+            //cout<<"\n";
+        }
+        flipTurn();
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                board1[i][j] = 0;
+            }
+        }
+        for(auto &from : black_pieces) {
+            board1[from.first.x][from.first.y]=1;
+            for(auto &to : possibleMoves(from.first)) {
+                    board1[to.x][to.y] = 1;
+            }
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                if(board1[i][j])
+                    black_occupied++;
+            }
+        }
+        //cout<<white_occupied<<" "<<black_occupied<<"\n";
+        return white_occupied - black_occupied;
+    }
+*/
+    int bishop_score(){
+        int cnt=0;
+        for(auto &p : white_pieces){
+            if(p.second==Piece::bishop || p.second==Piece::queen){
+                cnt++;
+            }
+        }
+        return cnt;
+    }
+
+    int opponent_bishop_score(){
+        int cnt=0;
+        for(auto &p : black_pieces){
+            if(p.second==Piece::bishop || p.second==Piece::queen){
+                cnt++;
+            }
+        }
+        return cnt;
+    }
+
+    int king_safety(){
+        int cnt=0;
+        if(turn==Turn::black)
+            flipTurn();
+        for(auto &p : white_pieces){
+            if(p.second==Piece::king){
+                for(auto &to : possibleMoves(p.first)) {
+                   cnt++;
+                }
+            }
+        }
+        return cnt;
+    }
+
+    int opponent_king_safety(){
+        int cnt=0;
+        if(turn==Turn::white)
+            flipTurn();
+        for(auto &p : black_pieces){
+            if(p.second==Piece::king){
+                for(auto &to : possibleMoves(p.first)) {
+                   cnt++;
+                }
+            }
+        }
+        return cnt;
+    }
+
+
     int occupied() {
         int white_occupied = 0, black_occupied = 0;
         int board1[9][9];
@@ -218,6 +316,36 @@ struct ChessBoard {
         return white_occupied - black_occupied;
     }
 
+    int woccupied() {
+        int white_occupied = 0, black_occupied = 0;
+        int board1[9][9];
+        if(turn!=Turn::white){
+            flipTurn();
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                board1[i][j] = 0;
+            }
+        }
+        for(auto &from : white_pieces) {
+            board1[from.first.x][from.first.y]=1;
+            for(auto &to : possibleMoves(from.first)) {
+                   board1[to.x][to.y] = 1;
+            }
+        }
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; ++j) {
+                //cout<<board1[i][j]<<" ";
+                if(board1[i][j]){
+                    white_occupied++;
+                }
+            }
+            //cout<<"\n";
+        }
+        return white_occupied;
+    }
+
+/*
     int bishop_score(){
         int cnt=0;
         for(auto &p : white_pieces){
@@ -225,21 +353,17 @@ struct ChessBoard {
                 cnt++;
             }
         }
-        if(cnt>1)
-            return 1;
-        return 0;
+        return cnt;
     }
-
+    
     int opponent_bishop_score(){
         int cnt=0;
-        for(auto &p : white_pieces){
+        for(auto &p : black_pieces){
             if(p.second==Piece::bishop || p.second==Piece::queen){
                 cnt++;
             }
         }
-        if(cnt>1)
-            return 1;
-        return 0;
+        return cnt;
     }
 
     int king_safety(){
@@ -269,7 +393,7 @@ struct ChessBoard {
         }
         return cnt;
     }
-
+*/
     int score(){
         int sumWhite = 0;
         for(auto & p : white_pieces){
@@ -281,17 +405,130 @@ struct ChessBoard {
         //cout<<"sw"<<sumWhite<<" sb"<<sumBlack<<endl;
         return sumWhite-sumBlack;
     }
+    
+    int scorewp(){
+        int sumWhite = 0;
+        for(auto & p : white_pieces){
+            if(pieceValues[p.second]!=1)
+                sumWhite += pieceValues[p.second];
+        }
+        int sumBlack = 0;
+        for(auto & p : black_pieces)
+            if(pieceValues[p.second]!=1)
+                sumBlack += pieceValues[p.second];
+        //cout<<"sw"<<sumWhite<<" sb"<<sumBlack<<endl;
+        return sumWhite-sumBlack;
+    }
+
+    double get_for_that(double alp,vector<int> a, int sec, vector<int> u){
+        //vector a(a,sec),b(u,1);
+        if(engine==1){
+            double pr;
+            for(int i=0;i<a.size();i++){
+                pr+=a[i]*u[i];
+            }
+            return alp*(sec)*(double)pr;
+        }else{
+            double pr;
+            for(int i=0;i<a.size();i++){
+                pr+=(a[i]-u[i])*(a[i]-u[i]);
+            }
+            int gamma=1;
+            double finally=exp(-0.5*gamma*pr);
+            return alp*(sec)*(double)finally;
+        }
+    }
+
+    double predict(vector<int> u){
+        double zz=0;
+        //u.print();
+        if(engine==1){
+            ifstream in;
+            in.open("svmsv.csv");
+            string get_row;
+            for(int i=0;i<158;i++){
+                //std::cout<<alphas[i]<<" ";
+                get_row.clear();
+                getline(in,get_row);
+                stringstream s(get_row);
+                double alp,sec;
+                string temp;
+                //in>>temp;
+                getline(s,temp,',');
+                //cout<<"temp->"<<temp<<endl;
+                alp=stod(temp);
+                getline(s,temp,',');
+                vector<int> a;
+                for(int i=0;i<7;i++){
+                    getline(s,temp,',');
+                    a.push_back(stoi(temp));
+                }
+                getline(s,temp,',');
+                sec=stoi(temp);
+                zz+=get_for_that(a[i],a,sec,u);
+                //std::cout<<alphas[i]<<" "<<data[i].val.second<<" "<<kernel(data[i],u)<<"\n";
+            }
+            string temp;
+            in>>temp;
+            zz-=stod(temp);
+        }else{
+            ifstream in;
+            in.open("rbfsvmsv.csv");
+            string get_row;
+            for(int i=0;i<248;i++){
+                //std::cout<<alphas[i]<<" ";
+                get_row.clear();
+                getline(in,get_row);
+                stringstream s(get_row);
+                double alp,sec;
+                string temp;
+                //in>>temp;
+                getline(s,temp,',');
+                //cout<<"temp->"<<temp<<endl;
+                alp=stod(temp);
+                getline(s,temp,',');
+                vector<int> a;
+                for(int i=0;i<7;i++){
+                    getline(s,temp,',');
+                    a.push_back(stoi(temp));
+                }
+                getline(s,temp,',');
+                sec=stoi(temp);
+                zz+=get_for_that(a[i],a,sec,u);
+                //std::cout<<alphas[i]<<" "<<data[i].val.second<<" "<<kernel(data[i],u)<<"\n";
+            }
+            string temp;
+            in>>temp;
+            zz-=stod(temp);
+        }
+        //std::cout<<std::endl<<b<<std::endl;
+        //std::cout<<"\n"<<zz<<" "<<b<<"\n";
+        //std::cout<<zz<<std::endl;
+        return zz;
+    }
+
+    double final_score(){
+        vector<int> s;
+        s.push_back(score());
+        s.push_back(scorewp());
+        s.push_back(occupied());
+        s.push_back(bishop_score());
+        s.push_back(opponent_bishop_score());
+        s.push_back(king_safety());
+        s.push_back(opponent_king_safety());
+        return (predict(s)/*+0.01*woccupied()*/);
+    }
  
     struct Move{
         Pos from,to;
-        int score;};
+        double score;};
 
     Move minimax(int depth, bool minimize,long long alpha,long long beta){//TODO: alpha beta pruning
     	
         Move best_move;
         best_move.score = -1000000 + 2000000*minimize;
         if(0 == depth){
-            best_move.score = score();
+            best_move.score = final_score();
             return best_move;
         }
  
@@ -309,6 +546,14 @@ struct ChessBoard {
                     best_move.score = option.score;
                     best_move.from = from.first;
                     best_move.to = to;
+                }else if(option.score == best_move.score){
+                    srand(time(NULL));
+                    int x=rand()%2;
+                    if(x==0){
+                        best_move.score = option.score;
+                        best_move.from = from.first;
+                        best_move.to = to;
+                    }
                 }
                 if(!minimize){
                 	alpha = MAX(alpha,best_move.score);
@@ -324,11 +569,20 @@ struct ChessBoard {
  
     void AIMove(){
         bool minimize = turn == Turn::black ? true : false;
+        /*double score = final_score();
+        Move m;
+        if(score==1){
+            m = minimax(5,minimize,INT_MIN,INT_MAX);
+        }else if(score==-1){
+            m = minimax(6,minimize,INT_MIN,INT_MAX);
+        }else{
+            m = minimax(5,minimize,INT_MIN,INT_MAX);
+        }*/
         Move m = minimax(5,minimize,INT_MIN,INT_MAX);
+        
         //cout << board[m.from.x - 1][m.from.y - 1];
         //cout << board[m.to.x - 1][m.to.y - 1];
         //cout << m.from.x << m.from.y << m.to.x << m.to.y << "\n"; 
-
         int reti = 9 - m.from.y;
         int retj = 9 - m.from.x - 1;
         retj = retj + 'A';
@@ -353,6 +607,27 @@ map<ChessBoard::Piece,int> ChessBoard::pieceValues {{ChessBoard::Piece::king, 10
 {ChessBoard::Piece::queen, 9}, {ChessBoard::Piece::black_pawn, 1}, {ChessBoard::Piece::white_pawn, 1},
 {ChessBoard::Piece::bishop, 5},{ChessBoard::Piece::knight, 3},{ChessBoard::Piece::rook, 4},};
 
+void gen_board(string line) {
+    int len = line.length();
+    int i = 1, j = 1;
+    for(int k = 0; k < len; k++) {
+        if(i==8 && j==9){
+            break;
+        } else if(line[k] == '/') {
+            i++;
+            j = 1;
+        } else if(line[k] >= '0' && line[k] <= '9') {
+            int n = line[k] - '0';
+            while(n--) board[i][j++] = '-';
+        } else board[i][j++] = line[k];
+    }
+    /*for(int i=1;i<9;i++){
+        for(int j=1;j<9;j++){
+            cout<<board[i][j]<<" ";
+        }cout<<endl;
+    }*/
+}
+
 
 
 int main(){
@@ -361,7 +636,8 @@ int main(){
 	string line;
 	fi>>line;
 	fi.close();
-	int len = line.length();
+	gen_board(line);
+    /*int len = line.length();
 	int i=0,j=0;
     char board1[8][8];
 	for(int k=0;k<len;k++){
@@ -379,7 +655,7 @@ int main(){
         for (int jj = 0, rj = 7; jj < 8; jj++, rj--) {
             board[rj][ri] =  board1[ii][jj];
         }
-    }
+    }*/
     ChessBoard game;
     game.reset();
     game.AIMove();

@@ -5,7 +5,6 @@ import sys
 if sys.version_info[0] > 2:
     print("This game runs on python 2 only")
 
-
 from chesslib import board
 
 # Load a save if it exists
